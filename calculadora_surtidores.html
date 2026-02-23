@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Surtidores – AMB Barcelona</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
     <style>
@@ -406,7 +406,8 @@
         }
 
         /* --- CHART SECTION --- */
-        .chart-container {
+        /* removed chart-container */
+        .chart-container-removed {
             position: relative;
             width: 100%;
             max-height: 300px;
@@ -634,15 +635,7 @@
             </div>
         </div>
 
-        <!-- GRÁFICO DE SENSIBILIDAD (FULL WIDTH) -->
-        <div class="panel full-width">
-            <h2>📊 Análisis de Sensibilidad en Tiempo Real</h2>
-            <p style="font-size:12px;color:#888;margin-bottom:12px;">¿Qué variable tiene más impacto en el número de
-                surtidores? Este gráfico se actualiza automáticamente.</p>
-            <div class="chart-container">
-                <canvas id="sensitivityChart"></canvas>
-            </div>
-        </div>
+
 
         <!-- EV 2030 SLIDER (FULL WIDTH) -->
         <div class="ev-section full-width">
@@ -683,7 +676,6 @@
 
         let baseSurtidores = 0;
         let baseLitrosDia = 0;
-        let sensitivityChart = null;
 
         function fmt(n) { return Math.round(n).toLocaleString('es-ES'); }
 
@@ -766,84 +758,10 @@
             document.getElementById('kpi_litros').textContent = (r.litrosDia / 1e6).toFixed(2) + 'M';
             document.getElementById('kpi_punta').textContent = fmt(r.punta);
 
-            updateSensitivityChart(d, r.surt);
             calcularEV();
         }
 
-        // --- SENSITIVITY CHART ---
-        function updateSensitivityChart(d, baseVal) {
-            const pct = 0.10; // +10% variation
-            const vars = [
-                { name: 'Población', key: 'pob' },
-                { name: 'Tasa Motorización', key: 'tasa' },
-                { name: 'Km Anuales', key: 'km' },
-                { name: 'Consumo Medio', key: 'cons' },
-                { name: 'Litros Repostaje', key: 'lit' },
-                { name: 'Factor Hora Punta', key: 'fac' },
-                { name: 'Tiempo Servicio', key: 'tiem' },
-            ];
 
-            const impacts = vars.map(v => {
-                const modified = { ...d };
-                modified[v.key] = d[v.key] * (1 + pct);
-                const newSurt = computeSurtidores(modified).surt;
-                return { name: v.name, delta: newSurt - baseVal, pct: ((newSurt - baseVal) / baseVal * 100) };
-            });
-
-            impacts.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
-
-            const labels = impacts.map(i => i.name);
-            const data = impacts.map(i => i.delta);
-            const colors = data.map(d => d > 0 ? 'rgba(200,60,60,0.8)' : 'rgba(60,160,60,0.8)');
-
-            if (sensitivityChart) {
-                sensitivityChart.data.labels = labels;
-                sensitivityChart.data.datasets[0].data = data;
-                sensitivityChart.data.datasets[0].backgroundColor = colors;
-                sensitivityChart.update('none');
-            } else {
-                const ctx = document.getElementById('sensitivityChart').getContext('2d');
-                sensitivityChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Δ Surtidores (+10% de la variable)',
-                            data: data,
-                            backgroundColor: colors,
-                            borderRadius: 6,
-                            barThickness: 28,
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (ctx) => {
-                                        const v = ctx.raw;
-                                        return (v > 0 ? '+' : '') + v + ' surtidores';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                title: { display: true, text: 'Variación en Surtidores Necesarios', font: { size: 11 } },
-                                grid: { color: 'rgba(0,0,0,0.05)' }
-                            },
-                            y: {
-                                grid: { display: false },
-                                ticks: { font: { weight: 'bold', size: 12 } }
-                            }
-                        }
-                    }
-                });
-            }
-        }
 
         // --- EV 2030 SIMULATOR ---
         function calcularEV() {
