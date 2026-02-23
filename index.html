@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Surtidores – AMB Barcelona</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #002147;
+            color: white;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        header h1 span {
+            font-weight: 700;
+        }
+
+        .defaults-btn {
+            background: #D4AF37;
+            color: #002147;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .defaults-btn:hover {
+            background: #e6c54d;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .panel h2 {
+            color: #002147;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #002147;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .input-group .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #002147;
+            transition: border-color 0.2s;
+            background: #fafbfc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #002147;
+            background: white;
+        }
+
+        .input-group .unit {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        /* Pasos del cálculo */
+        .step {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-num {
+            background: #002147;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-name {
+            font-size: 14px;
+            color: #444;
+        }
+
+        .step-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #002147;
+            text-align: right;
+        }
+
+        .step-unit {
+            font-size: 11px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        /* Resultado final */
+        .result-box {
+            margin-top: 24px;
+            background: #002147;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .result-box .result-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .result-box .result-number {
+            color: white;
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .result-box .result-sub {
+            color: #D4AF37;
+            font-size: 14px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .kpi {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #002147;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #bbb;
+            font-size: 12px;
+        }
+
+        /* Toggle selector */
+        .toggle-container {
+            margin-bottom: 16px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .toggle-header {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-options {
+            display: flex;
+            gap: 0;
+            background: #dde3ea;
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 12px;
+        }
+
+        .toggle-options label {
+            flex: 1;
+            text-align: center;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .toggle-options input[type="radio"] {
+            display: none;
+        }
+
+        .toggle-options input[type="radio"]:checked+label {
+            background: #002147;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 33, 71, 0.3);
+        }
+
+        .toggle-input {
+            display: none;
+        }
+
+        .toggle-input.active {
+            display: flex;
+        }
+
+        .derived-value {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #e8f0e8;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #2d6a2d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1><span>IMPROVEN</span> &nbsp;│&nbsp; Calculadora de Surtidores – AMB Barcelona</h1>
+        <button class="defaults-btn" onclick="cargarDefaults()">⟳ Cargar datos del caso</button>
+    </header>
+
+    <div class="container">
+
+        <!-- PANEL IZQUIERDO: INPUTS -->
+        <div class="panel">
+            <h2>Datos de entrada</h2>
+
+            <div class="input-group">
+                <label>Población</label>
+                <div class="input-row">
+                    <input type="number" id="poblacion" oninput="calcular()">
+                    <span class="unit">habitantes</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Tasa de motorización</label>
+                <div class="input-row">
+                    <input type="number" id="tasa" oninput="calcular()">
+                    <span class="unit">veh / 1.000 hab</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Kilómetros anuales por vehículo</label>
+                <div class="input-row">
+                    <input type="number" id="km" oninput="calcular()">
+                    <span class="unit">km / año</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Consumo medio</label>
+                <div class="input-row">
+                    <input type="number" id="consumo" step="0.1" oninput="calcular()">
+                    <span class="unit">L / 100 km</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Litros por repostaje</label>
+                <div class="input-row">
+                    <input type="number" id="litros" oninput="calcular()">
+                    <span class="unit">litros</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Factor de hora punta</label>
+                <div class="input-row">
+                    <input type="number" id="factor" step="0.01" oninput="calcular()">
+                    <span class="unit">(0.12 = 12%)</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Tiempo de servicio</label>
+                <div class="input-row">
+                    <input type="number" id="tiempo" oninput="calcular()">
+                    <span class="unit">minutos</span>
+                </div>
+            </div>
+
+            <div class="toggle-container">
+                <div class="toggle-header">Infraestructura: elige una opción</div>
+                <div class="toggle-options">
+                    <input type="radio" name="modo" id="modo_estaciones" checked onchange="cambiarModo()">
+                    <label for="modo_estaciones">Nº de estaciones</label>
+                    <input type="radio" name="modo" id="modo_surtidores" onchange="cambiarModo()">
+                    <label for="modo_surtidores">Surtidores por estación</label>
+                </div>
+                <div class="input-row toggle-input active" id="input_estaciones">
+                    <input type="number" id="estaciones" oninput="calcular()">
+                    <span class="unit">estaciones</span>
+                </div>
+                <div class="input-row toggle-input" id="input_surt_est">
+                    <input type="number" id="surt_por_est" oninput="calcular()">
+                    <span class="unit">surtidores / E.S.</span>
+                </div>
+                <div class="derived-value" id="dato_derivado"></div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO: RESULTADOS -->
+        <div class="panel">
+            <h2>Modelo de cálculo</h2>
+
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">1</div><span class="step-name">Censo de vehículos</span>
+                </div>
+                <div class="step-value"><span id="r_censo">—</span> <span class="step-unit">vehículos</span></div>
+            </div>
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">2</div><span class="step-name">Km diarios (flota)</span>
+                </div>
+                <div class="step-value"><span id="r_km">—</span> <span class="step-unit">km/día</span></div>
+            </div>
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">3</div><span class="step-name">Consumo diario</span>
+                </div>
+                <div class="step-value"><span id="r_litros">—</span> <span class="step-unit">litros/día</span></div>
+            </div>
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">4</div><span class="step-name">Repostajes diarios</span>
+                </div>
+                <div class="step-value"><span id="r_repostajes">—</span> <span class="step-unit">repostajes</span></div>
+            </div>
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">5</div><span class="step-name">Demanda hora punta</span>
+                </div>
+                <div class="step-value"><span id="r_punta">—</span> <span class="step-unit">veh/hora</span></div>
+            </div>
+            <div class="step">
+                <div class="step-label">
+                    <div class="step-num">6</div><span class="step-name">Capacidad / surtidor</span>
+                </div>
+                <div class="step-value"><span id="r_cap">—</span> <span class="step-unit">veh/hora</span></div>
+            </div>
+
+            <div class="result-box">
+                <div class="result-label">Surtidores necesarios</div>
+                <div class="result-number" id="r_surtidores">—</div>
+                <div class="result-sub" id="r_ratio">—</div>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi">
+                    <div class="kpi-value" id="kpi_litros">—</div>
+                    <div class="kpi-label">Millones L / día</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-value" id="kpi_punta">—</div>
+                    <div class="kpi-label">Veh en hora punta</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>Caso Práctico Surtidores – Improven 2026</footer>
+
+    <script>
+        const DEFAULTS = {
+            poblacion: 3239337,
+            tasa: 497,
+            km: 11000,
+            consumo: 6.5,
+            litros: 35,
+            factor: 0.12,
+            tiempo: 6,
+            estaciones: 150
+        };
+
+        function fmt(n) {
+            return Math.round(n).toLocaleString('es-ES');
+        }
+
+        function cambiarModo() {
+            const modoEst = document.getElementById('modo_estaciones').checked;
+            document.getElementById('input_estaciones').classList.toggle('active', modoEst);
+            document.getElementById('input_surt_est').classList.toggle('active', !modoEst);
+            calcular();
+        }
+
+        function cargarDefaults() {
+            document.getElementById('poblacion').value = DEFAULTS.poblacion;
+            document.getElementById('tasa').value = DEFAULTS.tasa;
+            document.getElementById('km').value = DEFAULTS.km;
+            document.getElementById('consumo').value = DEFAULTS.consumo;
+            document.getElementById('litros').value = DEFAULTS.litros;
+            document.getElementById('factor').value = DEFAULTS.factor;
+            document.getElementById('tiempo').value = DEFAULTS.tiempo;
+            document.getElementById('estaciones').value = DEFAULTS.estaciones;
+            document.getElementById('surt_por_est').value = '';
+            document.getElementById('modo_estaciones').checked = true;
+            cambiarModo();
+        }
+
+        function calcular() {
+            const pob = parseFloat(document.getElementById('poblacion').value) || 0;
+            const tasa = parseFloat(document.getElementById('tasa').value) || 0;
+            const km = parseFloat(document.getElementById('km').value) || 0;
+            const cons = parseFloat(document.getElementById('consumo').value) || 0;
+            const lit = parseFloat(document.getElementById('litros').value) || 1;
+            const fac = parseFloat(document.getElementById('factor').value) || 0;
+            const tiem = parseFloat(document.getElementById('tiempo').value) || 1;
+
+            const censo = (pob / 1000) * tasa;
+            const kmDia = censo * (km / 365);
+            const litrosDia = kmDia * (cons / 100);
+            const repost = litrosDia / lit;
+            const punta = repost * fac;
+            const capSurt = 60 / tiem;
+            const surt = Math.ceil(punta / capSurt);
+
+            // Lógica del toggle
+            const modoEst = document.getElementById('modo_estaciones').checked;
+            const derivado = document.getElementById('dato_derivado');
+            let ratioText = '';
+
+            if (modoEst) {
+                const est = parseFloat(document.getElementById('estaciones').value) || 1;
+                const ratio = surt / est;
+                ratioText = ratio.toFixed(1) + ' surtidores por estación';
+                derivado.textContent = '→ Se necesitan ' + ratio.toFixed(1) + ' surtidores por cada estación';
+            } else {
+                const spe = parseFloat(document.getElementById('surt_por_est').value) || 1;
+                const estNecesarias = Math.ceil(surt / spe);
+                ratioText = spe.toFixed(0) + ' surtidores/E.S. → ' + fmt(estNecesarias) + ' estaciones';
+                derivado.textContent = '→ Con ' + spe + ' surtidores por E.S., se necesitan ' + fmt(estNecesarias) + ' estaciones';
+            }
+
+            document.getElementById('r_censo').textContent = fmt(censo);
+            document.getElementById('r_km').textContent = fmt(kmDia);
+            document.getElementById('r_litros').textContent = fmt(litrosDia);
+            document.getElementById('r_repostajes').textContent = fmt(repost);
+            document.getElementById('r_punta').textContent = fmt(punta);
+            document.getElementById('r_cap').textContent = capSurt.toFixed(1);
+            document.getElementById('r_surtidores').textContent = fmt(surt);
+            document.getElementById('r_ratio').textContent = ratioText;
+            document.getElementById('kpi_litros').textContent = (litrosDia / 1e6).toFixed(2) + 'M';
+            document.getElementById('kpi_punta').textContent = fmt(punta);
+        }
+
+        // Cargar defaults al abrir
+        cargarDefaults();
+    </script>
+
+</body>
+
+</html>
