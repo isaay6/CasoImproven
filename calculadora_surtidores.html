@@ -420,13 +420,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 6px 8px;
+            margin: 0 -8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             font-size: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
         }
 
         .sens-row:last-child {
             border-bottom: none;
+        }
+
+        .sens-row:hover {
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .sens-row .sens-label {
@@ -454,13 +463,40 @@
 
         .sens-row.active {
             background: var(--gold-dim);
-            margin: 0 -8px;
-            padding: 6px 8px;
-            border-radius: 6px;
+        }
+
+        .sens-row.active:hover {
+            background: var(--gold-dim);
         }
 
         .sens-row.active .sens-label {
             color: var(--gold);
+        }
+
+        .sens-row .sens-apply {
+            font-size: 9px;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-left: 4px;
+        }
+
+        .sens-row:not(.active):hover .sens-apply {
+            opacity: 1;
+        }
+
+        @keyframes inputFlash {
+            0% {
+                box-shadow: 0 0 0 3px rgba(212, 167, 67, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 0 3px transparent;
+            }
+        }
+
+        .input-flash {
+            animation: inputFlash 0.8s ease-out;
         }
 
         /* ── EV SECTION ── */
@@ -834,73 +870,75 @@
                 <div class="card-title">Análisis de sensibilidad</div>
                 <div class="sens-grid">
                     <!-- Hora punta -->
-                    <div class="sens-block">
+                    <div class="sens-block" id="sb_hp">
                         <div class="sens-block-title">📈 Demanda hora punta</div>
-                        <div class="sens-row" id="sens_hp_low">
-                            <span class="sens-label">HP –10%</span>
+                        <div class="sens-row" onclick="aplicarEscenario('factor', 'mult', 0.9, 'sb_hp', this)">
+                            <span class="sens-label">HP –10% <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_hp_low">—</span><span class="sens-delta down"
                                     id="sd_hp_low"></span></span>
                         </div>
-                        <div class="sens-row active" id="sens_hp_base">
+                        <div class="sens-row active" onclick="aplicarEscenario('factor', 'reset', null, 'sb_hp', this)">
                             <span class="sens-label">HP Base</span>
                             <span class="sens-val" id="sv_hp_base">—</span>
                         </div>
-                        <div class="sens-row" id="sens_hp_high">
-                            <span class="sens-label">HP +10%</span>
+                        <div class="sens-row" onclick="aplicarEscenario('factor', 'mult', 1.1, 'sb_hp', this)">
+                            <span class="sens-label">HP +10% <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_hp_high">—</span><span class="sens-delta up"
                                     id="sd_hp_high"></span></span>
                         </div>
                     </div>
                     <!-- Tiempo servicio -->
-                    <div class="sens-block">
+                    <div class="sens-block" id="sb_ts">
                         <div class="sens-block-title">⏱️ Tiempo de servicio</div>
-                        <div class="sens-row" id="sens_ts_low">
-                            <span class="sens-label" id="sl_ts_low">—</span>
+                        <div class="sens-row" onclick="aplicarEscenario('tiempo', 'offset', -1, 'sb_ts', this)">
+                            <span class="sens-label" id="sl_ts_low">— <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_ts_low">—</span><span class="sens-delta down"
                                     id="sd_ts_low"></span></span>
                         </div>
-                        <div class="sens-row active">
+                        <div class="sens-row active" onclick="aplicarEscenario('tiempo', 'reset', null, 'sb_ts', this)">
                             <span class="sens-label" id="sl_ts_base">—</span>
                             <span class="sens-val" id="sv_ts_base">—</span>
                         </div>
-                        <div class="sens-row">
-                            <span class="sens-label" id="sl_ts_high">—</span>
+                        <div class="sens-row" onclick="aplicarEscenario('tiempo', 'offset', 1, 'sb_ts', this)">
+                            <span class="sens-label" id="sl_ts_high">— <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_ts_high">—</span><span class="sens-delta up"
                                     id="sd_ts_high"></span></span>
                         </div>
                     </div>
                     <!-- Penetración EV -->
-                    <div class="sens-block">
+                    <div class="sens-block" id="sb_ev">
                         <div class="sens-block-title">⚡ Penetración EV</div>
-                        <div class="sens-row active">
+                        <div class="sens-row active" onclick="aplicarEscenario('ev_pct', 'set', 0, 'sb_ev', this)">
                             <span class="sens-label">EV 0%</span>
                             <span class="sens-val" id="sv_ev0">—</span>
                         </div>
-                        <div class="sens-row">
-                            <span class="sens-label">EV 20%</span>
+                        <div class="sens-row" onclick="aplicarEscenario('ev_pct', 'set', 20, 'sb_ev', this)">
+                            <span class="sens-label">EV 20% <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_ev20">—</span><span class="sens-delta down"
                                     id="sd_ev20"></span></span>
                         </div>
-                        <div class="sens-row">
-                            <span class="sens-label">EV 40%</span>
+                        <div class="sens-row" onclick="aplicarEscenario('ev_pct', 'set', 40, 'sb_ev', this)">
+                            <span class="sens-label">EV 40% <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_ev40">—</span><span class="sens-delta down"
                                     id="sd_ev40"></span></span>
                         </div>
                     </div>
                     <!-- Políticas de diseño -->
-                    <div class="sens-block">
+                    <div class="sens-block" id="sb_pol">
                         <div class="sens-block-title">🎯 Política de diseño</div>
-                        <div class="sens-row">
-                            <span class="sens-label">Conservador (ρ≈80%)</span>
+                        <div class="sens-row" onclick="aplicarEscenario('rho_max', 'set', 0.80, 'sb_pol', this)">
+                            <span class="sens-label">Conservador (ρ≈80%) <span class="sens-apply">▶
+                                    aplicar</span></span>
                             <span><span class="sens-val" id="sv_pol_con">—</span><span class="sens-delta up"
                                     id="sd_pol_con"></span></span>
                         </div>
-                        <div class="sens-row active">
+                        <div class="sens-row active"
+                            onclick="aplicarEscenario('rho_max', 'reset', null, 'sb_pol', this)">
                             <span class="sens-label" id="sl_pol_base">Base</span>
                             <span class="sens-val" id="sv_pol_base">—</span>
                         </div>
-                        <div class="sens-row">
-                            <span class="sens-label">Eficiencia (ρ≈90%)</span>
+                        <div class="sens-row" onclick="aplicarEscenario('rho_max', 'set', 0.90, 'sb_pol', this)">
+                            <span class="sens-label">Eficiencia (ρ≈90%) <span class="sens-apply">▶ aplicar</span></span>
                             <span><span class="sens-val" id="sv_pol_eff">—</span><span class="sens-delta down"
                                     id="sd_pol_eff"></span></span>
                         </div>
@@ -1045,6 +1083,56 @@
 
             // ── EV slider ──
             calcularEV();
+        }
+
+        /* ═══════════════════════════════════════════
+           APPLY SENSITIVITY SCENARIO
+           ═══════════════════════════════════════════ */
+        const INPUT_MAP = {
+            factor: 'factor', tiempo: 'tiempo',
+            ev_pct: 'ev_pct', rho_max: 'rho_max'
+        };
+
+        function aplicarEscenario(field, mode, value, blockId, clickedRow) {
+            const inputId = INPUT_MAP[field];
+            if (!inputId) return;
+            const input = document.getElementById(inputId);
+            const currentVal = parseFloat(input.value) || DEFAULTS[field] || 0;
+
+            let newVal;
+            if (mode === 'reset') {
+                newVal = DEFAULTS[field];
+            } else if (mode === 'mult') {
+                newVal = DEFAULTS[field] * value;
+            } else if (mode === 'offset') {
+                newVal = DEFAULTS[field] + value;
+            } else if (mode === 'set') {
+                newVal = value;
+            }
+
+            // Update the input
+            input.value = (Number.isInteger(newVal)) ? newVal : parseFloat(newVal.toFixed(4));
+
+            // Move active class within the block
+            const block = document.getElementById(blockId);
+            if (block) {
+                block.querySelectorAll('.sens-row').forEach(r => r.classList.remove('active'));
+                clickedRow.classList.add('active');
+            }
+
+            // Flash the input
+            input.classList.remove('input-flash');
+            void input.offsetWidth; // trigger reflow
+            input.classList.add('input-flash');
+
+            // Also sync the EV slider if EV was changed
+            if (field === 'ev_pct') {
+                const slider = document.getElementById('ev_slider');
+                if (slider) slider.value = Math.min(newVal, 80);
+            }
+
+            // Recalculate
+            calcular();
         }
 
         /* ═══════════════════════════════════════════
